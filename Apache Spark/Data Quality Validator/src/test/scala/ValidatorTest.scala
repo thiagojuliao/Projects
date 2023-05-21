@@ -1,5 +1,6 @@
 package br.com.ttj
 
+import dqv.metrics_store.FileMetricsStore
 import dqv.reporters._
 import dqv.validations._
 import dqv.validator.DataQualityValidator
@@ -17,6 +18,12 @@ object ValidatorTest  extends App {
 
   val uuidRegex: String = "^[A-z|0-9]{8}-[A-z|0-9]{4}-[A-z|0-9]{4}-[A-z|0-9]{4}-[A-z|0-9]{12}$"
 
+  val fileMS: FileMetricsStore = new FileMetricsStore(
+    filePath = "src/main/resources/metrics/",
+    format = "csv",
+    separator = ","
+  )
+
   val dqv: DataQualityValidator = DataQualityValidator.builder()
     .name("dqv_test")
     .displayName("DQV Test")
@@ -32,6 +39,7 @@ object ValidatorTest  extends App {
       hasNumOfRowsGreatherThan(5000)
     )
     .reporter(ConsoleReporter)
+    .metricsStore(fileMS)
     .strategy(DROP_DIRTY)
     .create()
 

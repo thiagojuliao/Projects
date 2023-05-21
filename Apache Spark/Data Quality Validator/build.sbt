@@ -8,6 +8,13 @@ lazy val root = (project in file("."))
     idePackagePrefix := Some("br.com.ttj")
   )
 
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+
+assemblyJarName := "spark-data-quality-validator.jar"
+
 val sparkVersion: String = "3.3.2"
 
 libraryDependencies ++= Seq(
