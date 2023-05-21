@@ -39,7 +39,7 @@ object ConsoleReporter extends DataQualityReporter {
     println(result)
   }
 
-  private def printMetricsOverhaulResult(totalDirtyRecords: Long): Unit = {
+  private def printMetricsOverhaulResult(totalDirtyRecords: Long, totalDroppedRecords: Long): Unit = {
     val footer: String = {
       if (totalDirtyRecords > 0)
         s"$YELLOW⚠️ Not all validations were satisfied. 😔$RESET"
@@ -50,6 +50,7 @@ object ConsoleReporter extends DataQualityReporter {
     val result: String =
       s"""
          |$BLUE##### 📊 Metrics Overhaul Result - $totalDirtyRecords total dirty records found! #####$RESET
+         |$RED##### 🧹 Cleaning Overhaul Result - $totalDroppedRecords records were dropped! #####$RESET
          |$footer
          |""".stripMargin
 
@@ -60,8 +61,11 @@ object ConsoleReporter extends DataQualityReporter {
     val displayName: String = validator.getDisplayName
     val validations: Seq[DataQualityValidation] = validator.getValidations
     val observations: Seq[Observation] = validator.getObservations
-    val totalRecords: Long = validator.getValidationResult("total_records")
-    val totalDirtyRecords: Long = validator.getValidationResult("total_dirty_records")
+
+    val validationResult: Map[String, Long] = validator.getValidationResult
+    val totalRecords: Long = validationResult("total_records")
+    val totalDirtyRecords: Long = validationResult("total_dirty_records")
+    val totalDroppedRecords: Long = validationResult("total_dropped_records")
 
     implicit val observer: Observer = validator.getObserver
 
@@ -71,6 +75,6 @@ object ConsoleReporter extends DataQualityReporter {
 
     observations.foreach(printObservationResult)
 
-    printMetricsOverhaulResult(totalDirtyRecords)
+    printMetricsOverhaulResult(totalDirtyRecords, totalDroppedRecords)
   }
 }

@@ -1,6 +1,7 @@
 package br.com.ttj
 package dqv.validator
 
+import dqv.metrics_store.DataQualityMetricsStore
 import dqv.reporters.DataQualityReporter
 import dqv.validations._
 import dqv.validator.ValidationStrategies._
@@ -49,6 +50,11 @@ object DataQualityValidator {
       this
     }
 
+    def metricsStore(ms: DataQualityMetricsStore): Builder = {
+      config += "metricsStore" -> ms
+      this
+    }
+
     def strategy(validationStrategy: ValidationStrategy): Builder = {
       config += "strategy" -> validationStrategy
       this
@@ -88,6 +94,9 @@ object DataQualityValidator {
     private def getReporter: Option[DataQualityReporter] =
       config.get("reporter").map(_.asInstanceOf[DataQualityReporter])
 
+    private def getMetricsStore: Option[DataQualityMetricsStore] =
+      config.get("metricsStore").map(_.asInstanceOf[DataQualityMetricsStore])
+
     def create(): DataQualityValidator = new DataQualityValidator(
       name = getName,
       displayName = getDisplayName,
@@ -95,7 +104,8 @@ object DataQualityValidator {
       validations = getValidations,
       observations = getObservations,
       validationStrategy = getValidationStrategy,
-      reporter = getReporter
+      reporter = getReporter,
+      metricsStore = getMetricsStore
     )
   }
 
@@ -109,7 +119,8 @@ final class DataQualityValidator private (
                                            validations: Seq[DataQualityValidation],
                                            observations: Seq[Observation],
                                            validationStrategy: ValidationStrategy,
-                                           reporter: Option[DataQualityReporter]
+                                           reporter: Option[DataQualityReporter],
+                                           metricsStore: Option[DataQualityMetricsStore]
                                          ) {
 
   private val observer: org.apache.spark.sql.Observation =
@@ -160,6 +171,8 @@ final class DataQualityValidator private (
   def getObserver: org.apache.spark.sql.Observation = observer
 
   def getReporter: DataQualityReporter = reporter.orNull
+
+  def getMetricsStore: DataQualityMetricsStore = metricsStore.orNull
 
   def apply(dataframe: DataFrame)(implicit spark: SparkSession): DataFrame = {
     import spark.implicits._
@@ -217,10 +230,17 @@ final class DataQualityValidator private (
     )
   }
 
-  def runWith(dataframe: DataFrame)(writer: DataFrame => Unit)(implicit spark: SparkSession): Unit = {
-    writer(apply(dataframe))
+  def runWith(dataframe: DataFrame, dropAuxColumns: Boolean = true)(writer: DataFrame => Unit)(implicit spark: SparkSession): Unit = {
+
+    val validatedDF: DataFrame = {
+      if (dropAuxColumns) apply(dataframe).drop("_validations", "_observations")
+      else apply(dataframe)
+    }
+
+    writer(validatedDF)
 
     if (reporter.nonEmpty) reporter.get.report(this)
+    if (metricsStore.nonEmpty) metricsStore.get.save(this)
 
     validationStrategy match {
       case FAIL =>
