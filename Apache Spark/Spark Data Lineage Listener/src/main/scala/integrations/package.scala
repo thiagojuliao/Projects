@@ -27,9 +27,11 @@ package object integrations {
   def getIntegrationInfo: Map[String, Any] =
     ConfigFactory.load().getConfig("spark-data-lineage-listener").getString("integration") match {
       // TODO: Every new integration must be pattern matched here
-      case "databricks" => Databricks.getIntegrationInfo
+      case "databricks" => 
+	Databricks.getIntegrationInfo
 
-      case "debug" => Map("mode" -> "debug")
+      case "debug" => 
+	Map("mode" -> "debug")
 
       case integration =>
         throw new IllegalArgumentException(s"No previous pipeline found for this kind of integration: $integration")
