@@ -8,4 +8,6 @@ object Main extends App {
 
   account.show
   transaction.show
+
+  TransactionAuthorizer.authorize(account, transaction).show
 }
