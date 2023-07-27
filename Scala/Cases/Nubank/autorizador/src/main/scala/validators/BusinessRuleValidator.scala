@@ -1,11 +1,9 @@
 package validators
 
-trait BusinessRuleValidator {
-  type Env
-  type ValidationResult
-  private type BusinessRule[T] = T => ValidationResult
+trait BusinessRuleValidator[Env, R] {
+  private type BusinessRule[T] = T => R
 
-  def makeRule[T](f: T => ValidationResult): BusinessRule[T] = f
+  def makeRule[T](f: T => R): BusinessRule[T] = f
 
-  val validateAll: Env => ValidationResult
+  def validateAll: Env => R
 }

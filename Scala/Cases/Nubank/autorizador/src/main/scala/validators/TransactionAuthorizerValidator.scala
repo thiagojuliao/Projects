@@ -2,10 +2,12 @@ package validators
 
 import core.*
 
-object TransactionAuthorizerValidator extends BusinessRuleValidator {
-  private type DefaultInput      = (Account, Transaction)
-  override type Env              = DefaultInput
-  override type ValidationResult = List[String]
+object TransactionAuthorizerValidator
+    extends BusinessRuleValidator[
+      (Account, Transaction),
+      List[String]
+    ] {
+  private type DefaultInput = (Account, Transaction)
 
   private val accountNotActive = makeRule[DefaultInput] { (acc: Account, tx: Transaction) =>
     if !acc.active then "account-not-active" :: Nil else Nil
@@ -18,7 +20,7 @@ object TransactionAuthorizerValidator extends BusinessRuleValidator {
     else Nil
   }
 
-  override val validateAll: ((Account, Transaction)) => List[String] = { (acc: Account, tx: Transaction) =>
+  override def validateAll: ((Account, Transaction)) => List[String] = { (acc: Account, tx: Transaction) =>
     accountNotActive(acc, tx) ++ firstTransactionAboveThreshold(acc, tx)
   }
 }
