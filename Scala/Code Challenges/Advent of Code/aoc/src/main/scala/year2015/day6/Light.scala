@@ -17,6 +17,8 @@ object Light:
       case ON => true
       case _  => false
 
+    def isOff: Boolean = !isOn
+    
     def turnOn: LightState = ON
 
     def turnOff: LightState = OFF
