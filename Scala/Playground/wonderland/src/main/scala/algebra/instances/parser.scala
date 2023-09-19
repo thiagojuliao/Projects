@@ -14,12 +14,12 @@ object parser:
   given Applicative[Parser] with
     override def pure[A](a: A): Parser[A] = Parser(s => Some((s, a)))
 
-    override def ap[A, B](pa: Parser[A])(pfab: Parser[A => B]): Parser[B] =
+    override def ap[A, B](pa: Parser[A])(pf: Parser[A => B]): Parser[B] =
       Parser { s1 =>
         for
-          case (s2, fab) <- pfab.run(s1)
+          case (s2, f) <- pf.run(s1)
           case (s3, a) <- pa.run(s2)
-        yield (s3, fab(a))
+        yield (s3, f(a))
       }
 
   given Alternative[Parser] with
@@ -27,3 +27,13 @@ object parser:
 
     override def orElse[A](p1: Parser[A], p2: => Parser[A]): Parser[A] =
       Parser(s => p1.run(s) <|> p2.run(s))
+
+    override def pure[A](a: A): Parser[A] = Parser(s => Some(s -> a))
+
+    override def ap[A, B](pa: Parser[A])(pf: Parser[A => B]): Parser[B] =
+      Parser { s1 =>
+        for
+          case (s2, f) <- pf.run(s1)
+          case (s3, a) <- pa.run(s2)
+        yield (s3, f(a))
+      }

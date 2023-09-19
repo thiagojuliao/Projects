@@ -7,5 +7,5 @@ enum JsonValue:
   case JsonBool(bool: Boolean)
   case JsonNumber(n: Int)
   case JsonString(s: String)
-  case JsonArray(elements: Array[JsonValue])
+  case JsonArray(elements: List[JsonValue])
   case JsonObject(obj: Map[String, JsonValue])

@@ -12,19 +12,22 @@ trait Applicative[F[_]] extends Functor[F]:
   /** Sequence actions, discarding the value of the first argument.
     */
   def keepRight[A, B](fa: F[A], fb: F[B]): F[B] =
-    val fab = map(fb)(b => (_: A) => b)
-    ap(fa)(fab)
+    val ff = map(fa)(_ => (b: B) => b)
+    ap(fb)(ff)
 
   /** Sequence actions, discarding the value of the second argument.
     */
   def keepLeft[A, B](fa: F[A], fb: F[B]): F[A] =
-    val fab = map(fb)(_ => (a: A) => a)
-    ap(fa)(fab)
+    map2(fa, fb)((a, _) => a)
 
   /** See `map` on `Functor`.
     */
   override def map[A, B](fa: F[A])(f: A => B): F[B] =
     ap(fa)(pure(f))
+
+  def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
+    val ff = pure(f.curried)
+    ap(fb)(ap(fa)(ff))
 
 object Applicative:
   /** Summons a given instance of `Applicative[F]` into scope.

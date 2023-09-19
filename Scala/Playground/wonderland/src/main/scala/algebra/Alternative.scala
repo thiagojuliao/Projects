@@ -1,8 +1,10 @@
 package algebra
 
-trait Alternative[F[_]]:
+trait Alternative[F[_]] extends Applicative[F]:
   def empty[A]: F[A]
   def orElse[A](fa1: F[A], fa2: => F[A]): F[A]
+  def pure[A](a: A): F[A]
+  def ap[A, B](fa: F[A])(fab: F[A => B]): F[B]
 
 object Alternative:
   def apply[F[_]](using alternative: Alternative[F]): Alternative[F] =

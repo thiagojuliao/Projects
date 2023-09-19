@@ -25,10 +25,10 @@ object option:
   given Applicative[Option] with
     override def pure[A](a: A): Option[A] = Option(a)
 
-    override def ap[A, B](o: Option[A])(oab: Option[A => B]): Option[B] =
+    override def ap[A, B](o: Option[A])(of: Option[A => B]): Option[B] =
       for
-        f <- oab
         a <- o
+        f <- of
       yield f(a)
 
   given Alternative[Option] with
@@ -36,3 +36,11 @@ object option:
 
     override def orElse[A](o1: Option[A], o2: => Option[A]): Option[A] =
       o1.orElse(o2)
+
+    override def pure[A](a: A): Option[A] = Option(a)
+
+    override def ap[A, B](o: Option[A])(of: Option[A => B]): Option[B] =
+      for
+        a <- o
+        f <- of
+      yield f(a)
