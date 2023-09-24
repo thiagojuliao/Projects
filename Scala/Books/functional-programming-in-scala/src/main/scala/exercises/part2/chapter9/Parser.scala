@@ -21,6 +21,9 @@ object Parser:
     if s1.length - offset >= s2.length then -1
     else s1.length - offset
 
+  def succeed[A](a: A): Parser[A] =
+    _ => Success(a, 0)
+
   extension [A](p: Parser[A])
     /** 9.13: Implement string, regex, succeed, and slice for this initial representation of Parser. Note that slice is less efficient than it could
       * be, since it must still construct a value only to discard it. We’ll return to this later.
@@ -205,7 +208,7 @@ trait Parsers[Parser[+_]]:
     /** Sequences two parsers, ignoring the result of the second. We wrap the ignored half in slice, since we don't care about its result.
       */
     def <*(p2: => Parser[Any]): Parser[A] =
-      p.map2(p2.slice)((a, b) => a)
+      p.map2(p2.slice)((a, _) => a)
 
     /** Attempts `p` and strips trailing whitespace, usually used for the tokens of a grammar. */
     def token: Parser[A] = p.attempt <* whitespace
