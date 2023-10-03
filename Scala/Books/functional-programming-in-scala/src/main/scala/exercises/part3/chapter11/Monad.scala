@@ -1,17 +1,15 @@
 package exercises.part3.chapter11
 
+import exercises.part3.chapter12.Applicative
+
 export Monad.syntax.*
 
-trait Monad[F[_]] extends Functor[F]:
+trait Monad[F[_]] extends Applicative[F]:
   def unit[A](a: => A): F[A]
-
-  override def map[A, B](fa: F[A])(f: A => B): F[B] =
-    flatMap(fa)(a => unit(f(a)))
-
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 
-  def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
-    flatMap(fa)(a => map(fb)(b => f(a, b)))
+  override def ap[A, B](fa: F[A])(fab: F[A => B]): F[B] =
+    flatMap(fab)(f => flatMap(fa)(a => unit(f(a))))
 
   /** 11.3: The sequence and traverse combinators should be familiar to you by now, and your implementations of them from various prior chapters are
     * probably all very similar. Implement them once and for all on Monad[F]:
