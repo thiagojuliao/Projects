@@ -1,6 +1,6 @@
 package year2015.day6
 
-import year2015.extensions.*
+import utils.extensions.*
 
 object GridInstructions:
   private val pattern = "(.+) (\\d+,\\d+) through (\\d+,\\d+)".r
