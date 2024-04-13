@@ -1,7 +1,7 @@
-## Day 2
+## Day 3
 ___
 
-### Link: https://adventofcode.com/2016/day/2
+### Link: https://adventofcode.com/2016/day/3
 
 ### `Part 1`
 ![img.png](part1.png)
