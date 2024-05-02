@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 object parsers:
   def conditionalParser(predicate: String => Boolean): Parser[String] =
-    Parser(s => if predicate(s) then s.tail -> s.head.toString else s -> s)
+    Parser(s => if predicate(s) then s.tail -> s.head.toString else s -> "")
 
   val digitParser: Parser[String]  = conditionalParser(_.head.isDigit)
   val letterParser: Parser[String] = conditionalParser(_.head.isLetter)
@@ -29,6 +29,7 @@ object parsers:
     val (s1, a) = pa.run(s); lazy val (s2, b) = pb.run(s1)
     if s1 != s then s1 -> a else s2 -> b
   }
+end parsers
 
 object Playground extends App:
   import parsers.*
